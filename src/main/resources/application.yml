@@ -4,11 +4,8 @@ server:
 spring:
   application:
     name: challenge
-  autoconfigure:
-    exclude: 
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
   datasource:
-    url: jdbc:postgresql://localhost:5432/tenpo_db
+    url: jdbc:postgresql://localhost:5435/tenpo_db_challenge
     username: tenpo_db_user
     password: tenpo_db_pass
     driver-class-name: org.postgresql.Driver

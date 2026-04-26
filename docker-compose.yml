@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: tenpo_db_challenge
+      POSTGRES_USER: tenpo_db_user
+      POSTGRES_PASSWORD: tenpo_db_pass
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tenpo_db_user -d tenpo_db_challenge"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/tenpo_db_challenge
+      SPRING_DATASOURCE_USERNAME: tenpo_db_user
+      SPRING_DATASOURCE_PASSWORD: tenpo_db_pass
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
