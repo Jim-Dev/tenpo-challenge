@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tenpo.challenge.dto.CalculateRequest;
 import com.tenpo.challenge.dto.CalculateResponse;
+import com.tenpo.challenge.service.CalculateService;
 import com.tenpo.challenge.service.PercentageService;
 
 import jakarta.validation.Valid;
@@ -17,9 +18,11 @@ import jakarta.validation.Valid;
 public class CalculateController {
 
     private final PercentageService percentageService;
+    private final CalculateService calculateService;
 
-    public CalculateController(PercentageService percentageService) {
+    public CalculateController(PercentageService percentageService, CalculateService calculateService) {
         this.percentageService = percentageService;
+        this.calculateService = calculateService;
     }
 
     @PostMapping("/calculate")
@@ -29,7 +32,7 @@ public class CalculateController {
         Double num1 = request.num1();
         Double num2 = request.num2();
         Double percentage = percentageService.getPercentage();
-        Double result = (num1 + num2) * (1 + percentage / 100);
+        Double result = calculateService.getResult(num1, num2, percentage);
         CalculateResponse response = new CalculateResponse(
             num1, num2, percentage, result);
         return ResponseEntity.ok(response);
