@@ -5,9 +5,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class PercentageService {
 
-    private static final Double MOCK_PERCENTAGE = 10.0;
-
+    private static final Double MAX_LIMIT = 100.0;
+    
     public Double getPercentage() {
-        return MOCK_PERCENTAGE;
+        double randomPercentage = Math.random() * (MAX_LIMIT+1);
+        return (double) Math.round(randomPercentage);
     }
 }
