@@ -17,6 +17,12 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics
+
 springdoc:
   api-docs:
     path: /v3/api-docs
