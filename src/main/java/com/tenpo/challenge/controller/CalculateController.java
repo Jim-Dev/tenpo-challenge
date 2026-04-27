@@ -62,7 +62,8 @@ public final class CalculateController {
                 percentage = cacheManager.getCache("percentage")
                     .get("percentage", Double.class);
                 if (percentage == null) {
-                    percentage = DEFAULT_FALLBACK_PERCENTAGE;
+                    throw new IllegalStateException(
+                        "No cached percentage value available", e);
                 }
             }
         Double num1 = request.num1();
