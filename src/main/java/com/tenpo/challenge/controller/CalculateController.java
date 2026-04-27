@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tenpo.challenge.config.CacheConfig;
 import com.tenpo.challenge.dto.CalculateRequest;
 import com.tenpo.challenge.dto.CalculateResponse;
 import com.tenpo.challenge.service.CalculateService;
@@ -17,31 +16,51 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
-public class CalculateController {
+public final class CalculateController {
 
-    private static final int MAX_RETRIES = 3;
+    /** Default fallback percentage value. */
     private static final Double DEFAULT_FALLBACK_PERCENTAGE = 10.0;
 
+    /** Service for retrieving percentage values. */
     private final PercentageService percentageService;
+    /** Service for performing calculations. */
     private final CalculateService calculateService;
+    /** Cache manager for storing percentage values. */
     private final CacheManager cacheManager;
 
-    public CalculateController(PercentageService percentageService, CalculateService calculateService, CacheManager cacheManager) {
-        this.percentageService = percentageService;
-        this.calculateService = calculateService;
-        this.cacheManager = cacheManager;
+    /**
+     * Constructs a new CalculateController with the given services.
+     * @param givenPercentageService the service for retrieving
+     *                               percentage values
+     * @param givenCalculateService the service for performing calculations
+     * @param givenCacheManager the cache manager for storing percentage values
+     */
+    public CalculateController(
+        final PercentageService givenPercentageService,
+        final CalculateService givenCalculateService,
+        final CacheManager givenCacheManager) {
+        this.percentageService = givenPercentageService;
+        this.calculateService = givenCalculateService;
+        this.cacheManager = givenCacheManager;
     }
 
+    /**
+     * Calculates the result based on the provided numbers and percentage.
+     * @param request the calculate request containing num1 and num2
+     * @return ResponseEntity with CalculateResponse
+     */
     @PostMapping("/calculate")
     public ResponseEntity<CalculateResponse> calculate(
-        @Valid @RequestBody CalculateRequest request ) {
+        @Valid @RequestBody final CalculateRequest request) {
 
             Double percentage = 0.0;
             try {
                 percentage = percentageService.getPercentage();
-                cacheManager.getCache("percentage").put("percentage", percentage);
+                cacheManager.getCache("percentage")
+                    .put("percentage", percentage);
             } catch (Exception e) {
-                percentage = cacheManager.getCache("percentage").get("percentage", Double.class);
+                percentage = cacheManager.getCache("percentage")
+                    .get("percentage", Double.class);
                 if (percentage == null) {
                     percentage = DEFAULT_FALLBACK_PERCENTAGE;
                 }
