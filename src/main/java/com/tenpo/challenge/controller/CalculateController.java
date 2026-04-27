@@ -12,8 +12,13 @@ import com.tenpo.challenge.dto.CalculateResponse;
 import com.tenpo.challenge.service.CalculateService;
 import com.tenpo.challenge.service.PercentageService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 
+@Tag(name = "Calculate", description = "Calculation API")
 @RestController
 @RequestMapping("/api")
 public final class CalculateController {
@@ -49,6 +54,13 @@ public final class CalculateController {
      * @param request the calculate request containing num1 and num2
      * @return ResponseEntity with CalculateResponse
      */
+    @Operation(summary = "Calculate the result based on num1, num2 and percentage",
+    description = "This endpoint calculates the result using the formula: (num1 + num2) * (1 + percentage / 100). "
+        + "The percentage is retrieved from an external service, and if the service fails, it will attempt to use a cached value. "
+        + "If no cached value is available, it will throw an error.")
+    @ApiResponse(responseCode = "200", description = "Successful calculation")
+    @ApiResponse(responseCode = "400", description = "Invalid request")
+    @ApiResponse(responseCode = "500", description = "Internal server error")
     @PostMapping("/calculate")
     public ResponseEntity<CalculateResponse> calculate(
         @Valid @RequestBody final CalculateRequest request) {
