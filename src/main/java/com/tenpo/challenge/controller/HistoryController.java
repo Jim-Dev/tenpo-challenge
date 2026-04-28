@@ -22,8 +22,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tenpo.challenge.dto.CallHistoryResponse;
-import com.tenpo.challenge.dto.ErrorResponse;
 import com.tenpo.challenge.dto.PageResponse;
+import org.springframework.http.ProblemDetail;
+import io.swagger.v3.oas.annotations.media.Schema;
 import com.tenpo.challenge.service.CallHistoryService;
 
 /**
@@ -86,7 +87,7 @@ public class HistoryController {
                 content = @Content(
                     mediaType = "application/json",
                     schema = @Schema(
-                        implementation = ErrorResponse.class)
+                        implementation = ProblemDetail.class)
                 )
             )
         }

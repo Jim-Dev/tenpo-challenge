@@ -4,14 +4,14 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-
-import com.tenpo.challenge.dto.ErrorResponse;
 
 @RestControllerAdvice
 public final class GlobalExceptionHandler {
@@ -23,11 +23,14 @@ public final class GlobalExceptionHandler {
      * @return the error response
      */
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalStateException(
+    public ResponseEntity<ProblemDetail> handleIllegalStateException(
             final IllegalStateException ex) {
-        return ResponseEntity
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(new ErrorResponse("EX001", ex.getMessage()));
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+            HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage()
+        );
+        problem.setTitle("Internal Server Error");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(problem);
     }
 
     /**
@@ -37,15 +40,17 @@ public final class GlobalExceptionHandler {
      * @return the error response
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
+    public ResponseEntity<ProblemDetail> handleMethodArgumentNotValidException(
             final MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult().getFieldErrors().stream()
             .map(error -> error.getField() + ": " + error.getDefaultMessage())
             .reduce((msg1, msg2) -> msg1 + "; " + msg2)
             .orElse("Validation failed");
-        return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body(new ErrorResponse("EX002", message));
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+            HttpStatus.BAD_REQUEST, message
+        );
+        problem.setTitle("Validation Failed");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
     }
 
     /**
@@ -55,15 +60,17 @@ public final class GlobalExceptionHandler {
      * @return the error response
      */
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponse> handleConstraintViolationException(
+    public ResponseEntity<ProblemDetail> handleConstraintViolationException(
             final ConstraintViolationException ex) {
         String message = ex.getConstraintViolations().stream()
             .map(ConstraintViolation::getMessage)
             .reduce((msg1, msg2) -> msg1 + "; " + msg2)
             .orElse("Validation failed");
-        return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body(new ErrorResponse("EX003", message));
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+            HttpStatus.BAD_REQUEST, message
+        );
+        problem.setTitle("Constraint Violation");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
     }
 
     /**
@@ -73,11 +80,13 @@ public final class GlobalExceptionHandler {
      * @return the error response
      */
     @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNoResourceFoundException(
+    public ResponseEntity<ProblemDetail> handleNoResourceFoundException(
             final NoResourceFoundException ex) {
-        return ResponseEntity
-            .status(HttpStatus.NOT_FOUND)
-            .body(new ErrorResponse("EX404", ex.getMessage()));
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+            HttpStatus.NOT_FOUND, ex.getMessage()
+        );
+        problem.setTitle("Not Found");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
     }
 
     /**
@@ -87,12 +96,13 @@ public final class GlobalExceptionHandler {
      * @return the error response
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(
+    public ResponseEntity<ProblemDetail> handleHttpMessageNotReadableException(
             final HttpMessageNotReadableException ex) {
-        return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body(new ErrorResponse("EX004",
-                "Request body is missing or invalid"));
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+            HttpStatus.BAD_REQUEST, "Request body is missing or invalid"
+        );
+        problem.setTitle("Bad Request");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
     }
 
     /**
@@ -102,10 +112,13 @@ public final class GlobalExceptionHandler {
      * @return the error response
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(
+    public ResponseEntity<ProblemDetail> handleGenericException(
             final Exception ex) {
-        return ResponseEntity
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(new ErrorResponse("EX000", "Internal server error"));
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+            HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred"
+        );
+        problem.setTitle("Internal Server Error");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(problem);
     }
 }

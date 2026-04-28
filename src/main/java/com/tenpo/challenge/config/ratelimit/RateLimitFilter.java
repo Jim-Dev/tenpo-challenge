@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tenpo.challenge.dto.ErrorResponse;
+import org.springframework.http.ProblemDetail;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.ConsumptionProbe;
@@ -75,10 +75,12 @@ public final class RateLimitFilter extends OncePerRequestFilter {
         } else {
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            ErrorResponse errorResponse = new ErrorResponse(
-                "EX429", "Too many requests. Please try again later."
+            ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.TOO_MANY_REQUESTS,
+                "Too many requests. Please try again later."
             );
-            objectMapper.writeValue(response.getWriter(), errorResponse);
+            problem.setTitle("Too Many Requests");
+            objectMapper.writeValue(response.getWriter(), problem);
         }
     }
 

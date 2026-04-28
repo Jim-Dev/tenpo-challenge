@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import org.springframework.context.annotation.Import;
+import org.springframework.http.ProblemDetail;
 import com.tenpo.challenge.service.CalculateService;
 import com.tenpo.challenge.service.PercentageService;
 import com.tenpo.challenge.service.exceptions.ExternalServiceException;
@@ -53,7 +54,8 @@ class CalculateControllerIntegrationTest {
         mockMvc.perform(post("/api/calculate")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"num1\": 5.0, \"num2\": 5.0}"))
-            .andExpect(status().isInternalServerError());
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.title").value("Internal Server Error"));
     }
 
     @Test
@@ -61,14 +63,16 @@ class CalculateControllerIntegrationTest {
         mockMvc.perform(post("/api/calculate")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"num1\": null, \"num2\": 5.0}"))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.title").value("Validation Failed"));
     }
 
     @Test
     void should_return_400_when_body_missing() throws Exception {
         mockMvc.perform(post("/api/calculate")
                 .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.title").value("Bad Request"));
     }
 
     @Test
@@ -76,6 +80,16 @@ class CalculateControllerIntegrationTest {
         mockMvc.perform(post("/api/calculate")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(""))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.title").value("Bad Request"));
+    }
+
+    @Test
+    void should_return_400_when_unknown_properties() throws Exception {
+        mockMvc.perform(post("/api/calculate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"num12\": 5, \"num2\": 5}"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.title").value("Validation Failed"));
     }
 }
