@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -22,8 +23,10 @@ import jakarta.servlet.http.HttpServletResponse;
 /**
  * Filter that applies rate limiting (3 requests per minute per client IP).
  * Excludes Swagger UI and API docs from rate limiting.
+ * Only active when "rate-limit" profile is enabled.
  */
 @Component
+@Profile("rate-limit")
 public final class RateLimitFilter extends OncePerRequestFilter {
 
     /** Maximum requests per minute per client. */

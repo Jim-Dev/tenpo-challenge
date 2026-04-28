@@ -1,5 +1,8 @@
 package com.tenpo.challenge.controller;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -42,6 +45,24 @@ public final class GlobalExceptionHandler {
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
             .body(new ErrorResponse("EX002", message));
+    }
+
+    /**
+     * Handles ConstraintViolationException (validation on query params).
+     *
+     * @param ex the exception
+     * @return the error response
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(
+            final ConstraintViolationException ex) {
+        String message = ex.getConstraintViolations().stream()
+            .map(ConstraintViolation::getMessage)
+            .reduce((msg1, msg2) -> msg1 + "; " + msg2)
+            .orElse("Validation failed");
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(new ErrorResponse("EX003", message));
     }
 
     /**

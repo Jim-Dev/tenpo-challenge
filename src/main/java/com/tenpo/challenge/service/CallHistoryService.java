@@ -68,9 +68,12 @@ public class CallHistoryService {
      * @param size the page size
      * @return list of call history entries
      */
-    public List<CallHistory> getCallHistory(final int page, final int size) {
+     public List<CallHistory> getCallHistory(
+            final int page, final int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return callHistoryRepository.findAllByOrderByTimestampDesc(pageable).getContent();
+        return callHistoryRepository
+            .findAllByOrderByTimestampDesc(pageable)
+            .getContent();
     }
 
     /**

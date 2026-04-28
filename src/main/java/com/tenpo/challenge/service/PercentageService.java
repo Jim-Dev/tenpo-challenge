@@ -71,7 +71,7 @@ public class PercentageService {
             maxAttempts = MAX_RETRY_ATTEMPTS,
             backoff = @Backoff(delay = RETRY_DELAY_MS, multiplier = 2),
             retryFor = ExternalServiceException.class)
-    public final Double getPercentage() {
+    public Double getPercentage() {
 
         if (shouldFail()) {
             throw new ExternalServiceException("External service unavailable");
@@ -86,7 +86,7 @@ public class PercentageService {
      * @return the cached percentage
      */
     @Recover
-    public final Double recover(final ExternalServiceException e) {
+    public Double recover(final ExternalServiceException e) {
         Cache cache = cacheManager.getCache("percentage");
         Double cachedPercentage = cache.get("percentage", Double.class);
         if (cachedPercentage != null) {
