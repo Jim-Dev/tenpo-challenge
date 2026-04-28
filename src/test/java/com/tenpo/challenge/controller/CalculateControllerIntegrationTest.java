@@ -63,4 +63,19 @@ class CalculateControllerIntegrationTest {
                 .content("{\"num1\": null, \"num2\": 5.0}"))
             .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void should_return_400_when_body_missing() throws Exception {
+        mockMvc.perform(post("/api/calculate")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void should_return_400_when_body_empty() throws Exception {
+        mockMvc.perform(post("/api/calculate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(""))
+            .andExpect(status().isBadRequest());
+    }
 }
