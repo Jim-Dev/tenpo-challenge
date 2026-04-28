@@ -11,6 +11,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record ErrorResponse(
         @Schema(description = "Error code", example = "EX001")
         String message,
-        @Schema(description = "Error details", example = "No cached percentage value available")
-        String details) {
+        @Schema(
+            description = "Error details",
+            example = "No cached percentage value available"
+        )
+        String details
+) {
 }

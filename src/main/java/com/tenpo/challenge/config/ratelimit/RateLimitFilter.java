@@ -19,53 +19,73 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Filter that applies rate limiting (3 requests per minute per client IP).
+ * Excludes Swagger UI and API docs from rate limiting.
+ */
 @Component
-public class RateLimitFilter extends OncePerRequestFilter {
+public final class RateLimitFilter extends OncePerRequestFilter {
 
+    /** Maximum requests per minute per client. */
+    private static final int MAX_REQUESTS_PER_MINUTE = 3;
+
+    /** JSON object mapper for error responses. */
     private final ObjectMapper objectMapper;
-    private final ConcurrentHashMap<String, Bucket> buckets = new ConcurrentHashMap<>();
-    private final Bandwidth limit = Bandwidth.simple(3, Duration.ofMinutes(1));// TODO: REMOVE HARDOCDED 3 REQUESTS PER
-                                                                               // MINUTE
 
-    public RateLimitFilter(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    /** In-memory store of rate limit buckets per client IP. */
+    private final ConcurrentHashMap<String, Bucket> buckets =
+        new ConcurrentHashMap<>();
+
+    /** Rate limit configuration: 3 requests per minute. */
+    private final Bandwidth limit =
+        Bandwidth.simple(MAX_REQUESTS_PER_MINUTE, Duration.ofMinutes(1));
+
+    /**
+     * Constructs a new RateLimitFilter.
+     * @param givenObjectMapper the JSON object mapper
+     */
+    public RateLimitFilter(final ObjectMapper givenObjectMapper) {
+        this.objectMapper = givenObjectMapper;
     }
 
-    private Bucket getBucket(String clientIp) {
-        return buckets.computeIfAbsent(clientIp, ip -> Bucket.builder().addLimit(limit).build());
+    /**
+     * Returns or creates a rate limit bucket for the given client IP.
+     * @param clientIp the client IP address
+     * @return the rate limit bucket for the client
+     */
+    private Bucket getBucket(final String clientIp) {
+        return buckets.computeIfAbsent(clientIp,
+            ip -> Bucket.builder().addLimit(limit).build());
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(final HttpServletRequest request,
+                                    final HttpServletResponse response,
+                                    final FilterChain filterChain)
             throws ServletException, IOException {
         String clientIp = request.getRemoteAddr();
         Bucket bucket = getBucket(clientIp);
         ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
 
         if (probe.isConsumed()) {
-            response.addHeader("X-Rate-Limit-Remaining", String.valueOf(probe.getRemainingTokens()));// TODO: why do we
-                                                                                                     // add headers? is
-                                                                                                     // it for debugging
-                                                                                                     // or for client
-                                                                                                     // information?
             filterChain.doFilter(request, response);
         } else {
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            ErrorResponse errorResponse = new ErrorResponse("EX429", "Too many requests. Please try again later.");
+            ErrorResponse errorResponse = new ErrorResponse(
+                "EX429", "Too many requests. Please try again later."
+            );
             objectMapper.writeValue(response.getWriter(), errorResponse);
-            return;
         }
-
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
+    protected boolean shouldNotFilter(final HttpServletRequest request) {
         String path = request.getRequestURI();
-        // Exclude Swagger UI and API docs from rate limiting
         return path.startsWith("/swagger-ui/")
                 || path.startsWith("/v3/api-docs/")
-                || path.equals("/");
+                || path.equals("/")
+                || path.startsWith("/error");
     }
 
 }

@@ -18,8 +18,11 @@ public record CalculateResponse(
     @NotNull Double num2,
     @Schema(description = "Percentage applied", example = "10")
     @NotNull Double percentage,
-    @Schema(description = "Calculated result: (num1 + num2) * (1 + percentage / 100)",
-            example = "11")
+    @Schema(
+        description = "Calculated result:"
+            + " (num1 + num2) * (1 + percentage / 100)",
+        example = "11"
+    )
     @NotNull Double result
 ) {
 }
