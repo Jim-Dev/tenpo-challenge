@@ -1,0 +1,4 @@
+# Profile for testing rate limiter
+# Enables RateLimitFilter (not active in "test" profile)
+# Disables HistoryLoggingFilter (active only in default profile)
+spring.profiles.active=ratelimit-test

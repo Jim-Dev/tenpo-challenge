@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: challenge
+  profiles:
+    active: rate-limit
   datasource:
     url: jdbc:postgresql://localhost:5435/tenpo_db_challenge
     username: tenpo_db_user
