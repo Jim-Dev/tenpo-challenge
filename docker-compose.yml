@@ -22,7 +22,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: prod,rate-limit
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/tenpo_db_challenge
       SPRING_DATASOURCE_USERNAME: tenpo_db_user
       SPRING_DATASOURCE_PASSWORD: tenpo_db_pass

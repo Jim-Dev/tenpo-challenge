@@ -5,11 +5,11 @@ spring:
   application:
     name: challenge
   profiles:
-    active: rate-limit
+    active: ${SPRING_PROFILES_ACTIVE:rate-limit}
   datasource:
-    url: jdbc:postgresql://localhost:5435/tenpo_db_challenge
-    username: tenpo_db_user
-    password: tenpo_db_pass
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5435/tenpo_db_challenge}
+    username: ${SPRING_DATASOURCE_USERNAME:tenpo_db_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:tenpo_db_pass}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
