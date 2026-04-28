@@ -9,3 +9,4 @@ Caffeine for cache (30min as per spec)
 Retries (3) with exponential wait time
 Validation for requests
 Updated diagram
+lint issues fixed on assistive agentic session
