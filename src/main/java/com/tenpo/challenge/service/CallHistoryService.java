@@ -1,7 +1,10 @@
 package com.tenpo.challenge.service;
 
 import java.time.Instant;
+import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +15,7 @@ import com.tenpo.challenge.repository.entity.CallHistory;
  * Service for managing call history entries.
  */
 @Service
-public final class CallHistoryService {
+public class CallHistoryService {
 
     /** Repository for call history entries. */
     private final CallHistoryRepository callHistoryRepository;
@@ -56,5 +59,26 @@ public final class CallHistoryService {
             // Log error
         }
 
+    }
+
+    /**
+     * Retrieves call history entries with pagination.
+     *
+     * @param page the page number (0-indexed)
+     * @param size the page size
+     * @return list of call history entries
+     */
+    public List<CallHistory> getCallHistory(final int page, final int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return callHistoryRepository.findAllByOrderByTimestampDesc(pageable).getContent();
+    }
+
+    /**
+     * Counts total call history entries.
+     *
+     * @return total count
+     */
+    public long countCallHistory() {
+        return callHistoryRepository.count();
     }
 }
